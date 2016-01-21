@@ -118,10 +118,10 @@ void loop() {
 #endif
 
 #ifdef DIGITAL_TUBE
-    tm1637.display(0, int(boiler.getTemperatureOut()) / 10);  // 壁挂炉出水温度十位
-    tm1637.display(1, int(boiler.getTemperatureOut()) % 10);  // 壁挂炉出水温度个位
-    tm1637.display(2, int(boiler.getTemperatureIn()) / 10);   // 壁挂炉回水温度十位
-    tm1637.display(3, int(boiler.getTemperatureIn()) % 10);   // 壁挂炉回水温度各位
+    tm1637.display(0, round(boiler.getTemperatureOut()) / 10);  // 壁挂炉出水温度十位
+    tm1637.display(1, round(boiler.getTemperatureOut()) % 10);  // 壁挂炉出水温度个位
+    tm1637.display(2, round(boiler.getTemperatureIn()) / 10);   // 壁挂炉回水温度十位
+    tm1637.display(3, round(boiler.getTemperatureIn()) % 10);   // 壁挂炉回水温度各位
     tm1637.point(POINT_ON); // 显示分割符号
 #endif
 
