@@ -44,15 +44,15 @@ bool Thermistor::update() {
 
   for (i = 0; i < OVERSAMPLENR; i++) {
     heatCount[i] = analogRead(analog_pin);
-    delay(10);
+    //delay(10);
   }
 
 #ifdef FILTER
   bubbleSort(heatCount, OVERSAMPLENR);
-  for (i = 2; i < OVERSAMPLENR - 2; i ++) {
+  for (i = 3; i < OVERSAMPLENR - 3; i ++) {
     media += heatCount[i];
   }
-  media = media / (OVERSAMPLENR - 4) * OVERSAMPLENR;
+  media = media / (OVERSAMPLENR - 6) * OVERSAMPLENR;
 #else
   for (i = 0; i < OVERSAMPLENR; i++) {
     media += heatCount[i];
@@ -134,15 +134,15 @@ bool Thermistor::update() {
 
   for (i = 0; i < OVERSAMPLENR; i++) {
     heatCount[i] = analogRead(analog_pin);
-    delay(10); // 10ms的等待是必须的,否则温度读取会出错.
+    //delay(10); // 10ms的等待是必须的,否则温度读取会出错.
   }
 
 #ifdef FILTER
   bubbleSort(heatCount, OVERSAMPLENR);
-  for (i = 2; i < OVERSAMPLENR - 2; i ++) {
+  for (i = 3; i < OVERSAMPLENR - 3; i ++) {
     media += heatCount[i];
   }
-  media = media / (OVERSAMPLENR - 4) * OVERSAMPLENR;
+  media = media / (OVERSAMPLENR - 6) * OVERSAMPLENR;
 #else
   for (i = 0; i < OVERSAMPLENR; i++) {
     media += heatCount[i];

@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define OVERSAMPLENR 19 // 累计取样次数,必须大于7.大于19的话,看门狗的复位时间要加长,否则会触发.
+#define OVERSAMPLENR 25 // 累计取样次数,必须大于7.大于19的话,看门狗的复位时间要加长,否则会触发.
 
 class Thermistor {
   private:
