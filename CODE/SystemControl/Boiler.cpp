@@ -1,5 +1,5 @@
 /*
-  对于壁挂炉而言, 是没有PID算法可用的, 而且为了避免壁挂炉的频繁启动, 壁挂炉关闭后至少需要3分钟时间后再打开,以避免烟气清理问题以及旁通问题.
+  为了避免壁挂炉的频繁启动, 壁挂炉关闭后至少需要3分钟时间后再打开,以避免烟气清理问题以及旁通问题.
 
   针对壁挂炉的算法暂时考量如下:
   壁挂炉应该考量出水温度和回水温度.
@@ -10,7 +10,7 @@
   对于后续的版本,如果我们弄通了OpenTherm协议,我们可以通过控制支持OpenTherm的壁挂炉采暖热水温度来实现更好的控制.
 */
 #include "Boiler.h"
-#include "Arduino.h"
+#include <Arduino.h>
 
 #define MAX_TEMP_OUTPUT 60
 
@@ -20,31 +20,21 @@ extern Thermistor thermistorOut;
 
 Boiler::Boiler()
 {
-  timeGap = 0;
   targetTemp = 0;
   protectPeriod = 180000UL;
+  boilerPID = new PID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
+  timeGap = millis();
 }
 
 void Boiler::setTargetTemperature(float temp) {
   targetTemp = temp;
+  Setpoint = targetTemp;
+  boilerPID->SetOutputLimits(0, MAX_TEMP_OUTPUT);
+  boilerPID->SetMode(AUTOMATIC);
 }
 
 void Boiler::setProtectPeriod(uint32_t period) {
   protectPeriod = period;
-}
-
-bool Boiler::hasReachedTargetTemperature() {
-  if (tempIn >= getTargetTemperature()) { // 温度达到设定值
-    if (hitCount > 3) { // 而且连续3个循环均符合条件
-      return true; // 确认温度已经达到
-    } else {
-      hitCount ++;
-      return false;
-    }
-  } else {
-    hitCount = 0;
-    return false;
-  }
 }
 
 bool Boiler::update() {
@@ -56,17 +46,18 @@ bool Boiler::update() {
   tempOut = thermistorIn.getTemperature(); // 获取进水温度
 
   // 如果返回-27,代表温感探头有问题,应该停机
-  if (tempIn == -27 || tempOut == -27) {
+  // 如果没有加热请求,应该停机
+  // 如果回水温度达到保护温度,应该停机
+  if (tempIn == -27 || tempOut == -27 || targetTemp == 0 || tempOut >= MAX_TEMP_OUTPUT || tempIn >= targetTemp) {
     boilerState = false;
+  } else {
+    Input = tempIn;
+    boilerPID->Compute();
+    if (Output <= (MAX_TEMP_OUTPUT / 3)) { // 当PID升温需求减小到1/3时,证明基本快接近温度了,可以停止加热.需实测
+      boilerState = false;
+    }
   }
-  // 壁挂炉炉温度超过60度,应当停机
-  if (tempOut >= MAX_TEMP_OUTPUT) {
-    boilerState = false;
-  }
-  // 温度已经达到要求,应该停机
-  if (hasReachedTargetTemperature()) {
-    boilerState = false;
-  }
+
   // 检查待机保护时间是否达到
   if (!boilerState) {
     timeGap = millis();

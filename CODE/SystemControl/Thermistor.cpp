@@ -1,5 +1,5 @@
 #include "Thermistor.h"
-#include "Arduino.h"
+#include <Arduino.h>
 
 #define FAST_TABLE
 #define FILTER // 是否需要过滤电压波动所产生的纹波

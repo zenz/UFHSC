@@ -1,11 +1,13 @@
 #include "Thermistor.h"
-#include "Panel.h"
+#include "PID_v1.h"
 
 class Boiler {
   private:
-    uint8_t hitCount;
     float tempIn, tempOut, targetTemp; // 壁挂炉侧的回水温度,出水温度,目标回水温度
     uint32_t timeGap, protectPeriod;
+    double Kp = 20, Ki = 0.1, Kd = 1; // 根据现场实测调整
+    double Setpoint, Input, Output;
+    PID* boilerPID;
 
   public:
     Boiler();
@@ -24,7 +26,6 @@ class Boiler {
     float getTemperatureOut() const {
       return tempOut;
     }
-    bool hasReachedTargetTemperature();
     bool update();
 };
 
